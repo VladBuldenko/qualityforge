@@ -22,7 +22,7 @@ services:
       WEB_ORIGIN: http://localhost:5173
       # Dev-only fallback; set SESSION_SECRET in a root .env (or shell) to override.
       SESSION_SECRET: ${SESSION_SECRET:-walletshop-dev-only-session-secret}
-    command: sh -c "npx prisma migrate deploy && npm run dev"
+    command: sh -c "npx prisma migrate deploy && npm run seed && npm run dev"
     ports:
       - "4000:4000"
     volumes:

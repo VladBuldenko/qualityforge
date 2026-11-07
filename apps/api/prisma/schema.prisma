@@ -31,3 +31,28 @@ model Session {
   @@index([expire], map: "IDX_session_expire")
   @@map("session")
 }
+
+enum ProductType {
+  PHYSICAL
+  DIGITAL
+}
+
+// DB-level CHECK constraints (price >= 0, stock >= 0, PHYSICAL requires stock) live in the migration SQL.
+model Product {
+  id            String      @id @default(uuid()) @db.Uuid
+  name          String
+  slug          String      @unique
+  description   String
+  type          ProductType
+  category      String
+  priceCents    Int
+  currency      String      @default("EUR")
+  image         String
+  stockQuantity Int? // null = unlimited (digital demo availability)
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([isActive, type])
+  @@index([category])
+}

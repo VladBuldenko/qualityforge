@@ -16,6 +16,7 @@ export function PublicLayout() {
       <header className="topbar">
         <Brand />
         <nav className="row">
+          <Link className="btn ghost" to="/shop">Shop</Link>
           {user ? (
             <Link className="btn" to="/dashboard">Dashboard</Link>
           ) : (
@@ -44,6 +45,7 @@ export function AppLayout() {
         <Brand />
         <nav className="side-nav" aria-label="Main">
           <NavLink to="/dashboard">Dashboard</NavLink>
+          <NavLink to="/shop">Shop</NavLink>
           <NavLink to="/profile">Profile</NavLink>
         </nav>
         <div className="side-foot">

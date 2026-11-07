@@ -19,7 +19,7 @@ export function Home() {
       <div className="grid3">
         <div className="card"><h3>Wallets</h3><p className="muted">EUR and USD balances. Coming soon.</p></div>
         <div className="card"><h3>Exchange</h3><p className="muted">Convert between currencies at demo rates. Coming soon.</p></div>
-        <div className="card"><h3>Shop</h3><p className="muted">Pay for products from your wallet. Coming soon.</p></div>
+        <div className="card"><h3>Shop</h3><p className="muted">Browse physical and digital products.</p><Link to="/shop">Open shop →</Link></div>
       </div>
     </main>
   );
@@ -161,7 +161,7 @@ export function Dashboard() {
       </section>
       <div className="grid3">
         <section className="card placeholder"><h3>Wallet</h3><p className="muted">EUR/USD wallets are coming in a later task.</p></section>
-        <section className="card placeholder"><h3>Shop</h3><p className="muted">The product catalog is coming in a later task.</p></section>
+        <section className="card"><h3>Shop</h3><p className="muted">Browse physical and digital products.</p><Link to="/shop">Open shop →</Link></section>
         <section className="card placeholder"><h3>Orders</h3><p className="muted">Order history is coming in a later task.</p></section>
       </div>
     </>
