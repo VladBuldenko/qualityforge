@@ -1,0 +1,2 @@
+# Prisma-generated migrations are checksummed; do not edit them to satisfy whitespace checks.
+apps/api/prisma/migrations/**/*.sql whitespace=-blank-at-eof

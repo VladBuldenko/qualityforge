@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: walletshop
+      POSTGRES_PASSWORD: walletshop
+      POSTGRES_DB: walletshop
+    ports:
+      - "5433:5432" # 5433 on host to avoid clashing with a local Postgres
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U walletshop"]
+      interval: 3s
+      retries: 10
+
+  api:
+    build: ./apps/api
+    environment:
+      DATABASE_URL: postgresql://walletshop:walletshop@db:5432/walletshop
+      API_PORT: 4000
+      WEB_ORIGIN: http://localhost:5173
+      # Dev-only fallback; set SESSION_SECRET in a root .env (or shell) to override.
+      SESSION_SECRET: ${SESSION_SECRET:-walletshop-dev-only-session-secret}
+    command: sh -c "npx prisma migrate deploy && npm run dev"
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./apps/api/src:/app/src
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build: ./apps/web
+    environment:
+      VITE_API_URL: http://localhost:4000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/web/src:/app/src
+    depends_on:
+      - api
+
+volumes:
+  dbdata:
