@@ -277,4 +277,3 @@ test("users cannot see or reuse each other's exchanges", async () => {
   const b = await (await eurToUsd(emailB, 100, { idempotencyKey: k })).json();
   assert.notEqual(a.exchange.id, b.exchange.id);
 });
-
