@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api, ApiError } from "./api";
 import { money } from "./cart";
+import { ExchangePanel } from "./exchange";
 
 type Balance = { currency: "EUR" | "USD"; balanceMinor: number };
 type Tx = { reference: string; type: "CREDIT" | "DEBIT"; currency: "EUR" | "USD"; amountMinor: number; balanceAfterMinor: number | null; description: string | null; createdAt: string };
@@ -19,12 +20,14 @@ export function WalletPage() {
   const [currency, setCurrency] = useState<"" | "EUR" | "USD">("");
   const [txLoading, setTxLoading] = useState(true);
   const [topUpOpen, setTopUpOpen] = useState(false);
+  const [exchangeOpen, setExchangeOpen] = useState(false);
+  const [refresh, setRefresh] = useState(0); // bumped after an exchange to reload balances + history
 
   useEffect(() => {
     api<{ wallet: { balances: Balance[] } }>("/api/wallet")
       .then((r) => setBalances(r.wallet.balances))
       .catch((e) => setBalError(e instanceof ApiError ? e.message : "Failed to load balances"));
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     let cancelled = false;
@@ -37,7 +40,7 @@ export function WalletPage() {
       .catch((e) => !cancelled && setTxError(e instanceof ApiError ? e.message : "Failed to load transactions"))
       .finally(() => !cancelled && setTxLoading(false));
     return () => { cancelled = true; };
-  }, [page, currency]);
+  }, [page, currency, refresh]);
 
   return (
     <>
@@ -63,10 +66,11 @@ export function WalletPage() {
 
       <div className="row wallet-actions">
         <button className="btn" onClick={() => setTopUpOpen(true)} aria-expanded={topUpOpen}>Top up EUR</button>
-        <button className="btn ghost" disabled aria-disabled="true">Exchange — Coming soon</button>
+        <button className="btn ghost" onClick={() => setExchangeOpen(true)} aria-expanded={exchangeOpen}>Exchange EUR ⇄ USD</button>
       </div>
 
       {topUpOpen && <TopUpPanel onClose={() => setTopUpOpen(false)} />}
+      {exchangeOpen && <ExchangePanel balances={balances} onClose={() => setExchangeOpen(false)} onDone={() => { setPage(1); setRefresh((n) => n + 1); }} />}
 
       <section className="card">
         <div className="row between">

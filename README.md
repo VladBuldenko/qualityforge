@@ -100,3 +100,11 @@ Customers pay for the cart from their **EUR demo wallet** (no Stripe session is 
 - Digital items get a clearly marked **demo** code (not a real license). Physical delivery (Processing → Shipped → Delivered) is **simulated** from the order's age, only advanced when the owner reads the order.
 
 Lock order everywhere: cart → products → wallet account. After pulling changes that add Prisma models, rebuild the API image (`docker compose up -d --build api`) so its generated client matches.
+
+### EUR/USD currency exchange (demo)
+
+Customers can convert between their EUR and USD wallets at a **fixed, illustrative rate: 1 EUR = 1.10 USD** (`demo-v1`; not real market pricing, no fee, no external FX provider).
+
+- Exact integer math (BigInt): EUR→USD is `amount × 11 / 10`, USD→EUR is the reciprocal `amount × 10 / 11`, both **rounded down** to the cent. An exchange that would yield 0 is rejected.
+- `GET /api/exchange/quote?fromCurrency&toCurrency&amountMinor` is informational (no funds reserved). `POST /api/exchange` takes `{ fromCurrency, toCurrency, amountMinor, rateVersion, idempotencyKey }`; amounts are recomputed on the server and a stale `rateVersion` is rejected (409 `STALE_RATE`). `GET /api/exchanges` lists the user's history.
+- One DB transaction: lock EUR wallet, then USD wallet (fixed order, so opposite exchanges can't deadlock) → idempotency check → debit → credit → `Exchange` row. Reusing an idempotency key with different input is 409. The `Exchange` table is append-only (trigger) and stores the executed rate and amounts.

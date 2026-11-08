@@ -7,6 +7,7 @@ import { authRouter, SESSION_COOKIE } from "./auth.js";
 import { cartRouter } from "./cart.js";
 import { checkoutRouter } from "./checkout.js";
 import { ordersRouter } from "./orders.js";
+import { exchangeRouter, exchangesRouter } from "./exchange.js";
 import { productsRouter } from "./products.js";
 import { stripeWebhookRouter, topUpsRouter } from "./topups.js";
 import { walletRouter } from "./wallet.js";
@@ -68,6 +69,8 @@ app.use("/api/wallet", walletRouter);
 app.use("/api/top-ups", topUpsRouter);
 app.use("/api/checkout", checkoutRouter);
 app.use("/api/orders", ordersRouter);
+app.use("/api/exchange", exchangeRouter);
+app.use("/api/exchanges", exchangesRouter);
 
 // Express 5 forwards async errors here; keep unexpected failures as clean 500s.
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {

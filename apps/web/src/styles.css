@@ -117,3 +117,7 @@ h2 { font-size: 1.1rem; margin: 0 0 .75rem; } h3 { margin: 0 0 .25rem; }
   .checkout-grid { grid-template-columns:1fr; }
   .order-row { grid-template-columns:1fr; gap:.4rem; }
 }
+.exchange { margin-bottom:1.25rem; } .exchange-dir { align-items:flex-end; gap:.75rem; } .exchange-dir .field { flex:1; max-width:260px; margin-bottom:0; }
+.quote, .confirm-box { background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:.75rem; margin:.5rem 0 1rem; }
+.exchange .field input, .exchange .field select { max-width:100%; }
+@media (max-width: 720px) { .exchange-dir { flex-direction:column; align-items:stretch; } .exchange-dir .field { max-width:none; } .exchange .row .btn { width:100%; } }

@@ -12,6 +12,7 @@ export async function deleteTestUsers(emails: string[]) {
   await prisma.$transaction([
     prisma.$executeRaw`SELECT set_config('walletshop.allow_ledger_delete', 'on', true)`,
     prisma.digitalFulfillment.deleteMany({ where: { orderItem: { order: { userId: { in: ids } } } } }),
+    prisma.exchange.deleteMany({ where: { userId: { in: ids } } }),
     prisma.orderItem.deleteMany({ where: { order: { userId: { in: ids } } } }),
     prisma.order.deleteMany({ where: { userId: { in: ids } } }),
     prisma.topUp.deleteMany({ where: { userId: { in: ids } } }),

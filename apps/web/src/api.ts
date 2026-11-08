@@ -7,6 +7,8 @@ export class ApiError extends Error {
     message: string,
     public status: number,
     public fields?: Record<string, string[]>,
+    public code?: string,
+    public data?: Record<string, unknown>,
   ) {
     super(message);
   }
@@ -25,6 +27,6 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     throw new ApiError("Cannot reach the server. Please try again.", 0);
   }
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ApiError(data.error ?? "Something went wrong", res.status, data.fields);
+  if (!res.ok) throw new ApiError(data.error ?? "Something went wrong", res.status, data.fields, data.code, data);
   return data as T;
 }
