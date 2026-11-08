@@ -3,25 +3,27 @@
 WalletShop (`apps/web` React+Vite, `apps/api` Express+Prisma, PostgreSQL, Docker Compose) is a demo FinTech + e-commerce app.
 No real funds or production payment operations. Run: `docker compose up -d --build`; API tests: `cd apps/api && npm test`.
 
-## Automatic Commit Policy
+## Automatic Git Commit and Push Policy
 
-The user authorizes **local commits** after each successfully completed development TASK (no explicit request needed). Pushes are NOT authorized.
+The user authorizes **local commits and ordinary pushes** to the configured GitHub remote after every successfully completed and verified development TASK. Do not ask for separate approval for these.
+Remote: `origin` = `git@github.com:VladBuldenko/qualityforge.git` (public repo), branch `main` tracking `origin/main`.
+Auth: dedicated deploy key `~/.ssh/qualityforge_deploy`, configured via this repo's `core.sshCommand`. Never display, copy, commit or upload the private key; never use account-wide GitHub auth.
 
-1. At the start of every TASK, inspect `git status` and note existing changes.
-2. Record which files belong to the current TASK.
-3. Implement the requested functionality.
-4. Run minimal relevant verification (tests, type checks, build, health check as applicable).
-5. Fix blocking errors before committing.
-6. Stage only files created/modified for the current TASK, by explicit path (never `git add -A` or `git add .`).
-7. Inspect staged files and staged diffs.
-8. Confirm no secrets, unrelated files, nested repositories, or generated artifacts are staged.
-9. Run `git diff --cached --check`.
-10. Create one logical local commit per successfully completed TASK.
-11. Several independently completed and verified blocks within a TASK may be committed separately.
-12. Never commit incomplete or broken functionality as a successful task.
-13. If verification is blocked, explain the blocker and leave changes uncommitted unless the user explicitly asks for a checkpoint commit.
-14. After each commit, report the SHA, message, verification results, and remaining `git status`.
-15. Apply this policy in all future sessions.
+At the start of every TASK, inspect `git status` and note existing changes. After the work is complete:
+
+1. Inspect Git status and identify the files belonging to the task.
+2. Run minimal relevant verification (tests, type checks, build, health check as applicable); fix blocking errors first.
+3. Stage only task-related files, by explicit path (never `git add -A` or `git add .`).
+4. Review staged files and diffs.
+5. Verify no secrets, credentials, `.env` files, database volumes, generated dependencies (`node_modules`, `dist`), unrelated files, or nested Git repositories are staged. The repo is PUBLIC: nothing private may be committed.
+6. Run `git diff --cached --check` (migration SQL is exempt from the EOF-blank-line rule via `.gitattributes`).
+7. Create one logical local commit using Conventional Commits (separate commits allowed for independently verified blocks).
+8. Verify the remote is the intended one and the upstream is `origin/main`.
+9. Push with an ordinary `git push` (no force).
+10. Confirm the remote branch contains the new commit (`git ls-remote origin main` matches `git rev-parse HEAD`).
+11. Report the commit SHA, branch, GitHub commit URL (`https://github.com/VladBuldenko/qualityforge/commit/<sha>`), verification results, and remaining `git status`.
+
+Never commit or push incomplete or broken work as a completed task. If verification is blocked, explain the blocker and leave changes uncommitted unless the user asks for a checkpoint commit. If a push is rejected, do not force it or rewrite history: report the problem. Do not create commits solely for incidental file changes.
 
 ### Commit naming (Conventional Commits)
 
@@ -32,12 +34,12 @@ Messages must describe the actual changes.
 
 ## Git Safety
 
-- Never push, merge, rebase, force push, or rewrite history automatically.
+- Ordinary pushes of verified work are authorized. Never force push, merge branches automatically, rebase, delete branches (local or remote), or rewrite published history.
 - Never `git reset --hard`, `git clean`, or otherwise destroy working-tree changes.
-- Never stage `.env`, secrets, credentials, database files/volumes, `node_modules`, or `dist`.
+- Never stage `.env`, secrets, credentials, SSH keys, database files/volumes, `node_modules`, or `dist`.
 - Never stage unrelated pre-existing changes: `docs/` (user's requirements) and the nested `qualityforge/.git` directory must stay untouched and uncommitted unless the user says otherwise.
-- Do not change branches without a task-related reason. Never use `--no-verify`.
-- Prisma migrations are checksummed once applied: never edit an applied migration (`.gitattributes` relaxes the EOF whitespace check for them).
+- Do not change branches without a task-related reason. Never use `--no-verify`. Do not modify other repositories.
+- Prisma migrations are checksummed once applied: never edit an applied migration.
 
 ## Development Preferences
 
