@@ -24,6 +24,7 @@ model User {
   walletAccounts     WalletAccount[]
   walletTransactions WalletTransaction[]
   topUps             TopUp[]
+  orders             Order[]
 }
 
 // Session store table used by connect-pg-simple (layout must match its expectations).
@@ -57,7 +58,8 @@ model Product {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  cartItems CartItem[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 
   @@index([isActive, type])
   @@index([category])
@@ -131,6 +133,7 @@ model WalletTransaction {
   createdAt   DateTime        @default(now())
   entries     LedgerEntry[]
   topUp       TopUp?
+  order       Order?
 
   @@index([userId, createdAt])
 }
@@ -179,4 +182,83 @@ model TopUp {
   updatedAt               DateTime           @updatedAt
 
   @@index([userId, createdAt])
+}
+
+enum PaymentStatus {
+  PAID
+}
+
+// CONFIRMED = paid, something still to be fulfilled; COMPLETED = every item fulfilled.
+enum OrderStatus {
+  CONFIRMED
+  COMPLETED
+}
+
+// Digital items are DELIVERED as soon as the order is paid (demo entitlement issued).
+// Physical items progress PROCESSING -> SHIPPED -> DELIVERED. This is a SIMULATION only (no carrier).
+enum FulfillmentState {
+  PROCESSING
+  SHIPPED
+  DELIVERED
+}
+
+// A paid order. Orders exist only after a successful wallet debit (created in the same DB transaction).
+// CHECK constraints (totals, shipping all-or-none, EUR only) live in the migration SQL.
+model Order {
+  id                  String            @id @default(uuid()) @db.Uuid
+  reference           String            @unique // customer-facing, e.g. WS-7K2M9Q4X
+  userId              String            @db.Uuid
+  user                User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  currency            Currency          @default(EUR)
+  totalCents          Int
+  paymentStatus       PaymentStatus     @default(PAID)
+  status              OrderStatus       @default(CONFIRMED)
+  idempotencyKey      String
+  requestHash         String // hash of the checkout request details; a reused key with different details is rejected
+  walletTransactionId String            @unique @db.Uuid
+  walletTransaction   WalletTransaction @relation(fields: [walletTransactionId], references: [id], onDelete: Restrict)
+  shippingName        String?
+  shippingLine1       String?
+  shippingLine2       String?
+  shippingCity        String?
+  shippingPostalCode  String?
+  shippingCountry     String?
+  createdAt           DateTime          @default(now())
+  items               OrderItem[]
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
+}
+
+// Immutable snapshot of what was bought, at the price paid. Never re-read from Product for display.
+model OrderItem {
+  id               String               @id @default(uuid()) @db.Uuid
+  orderId          String               @db.Uuid
+  order            Order                @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  productId        String               @db.Uuid
+  product          Product              @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productName      String
+  productType      ProductType
+  quantity         Int
+  unitPriceCents   Int
+  lineTotalCents   Int
+  currency         Currency             @default(EUR)
+  fulfillmentState FulfillmentState
+  createdAt        DateTime             @default(now())
+  digital          DigitalFulfillment[]
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// Demo-only entitlement for a paid digital item (one per purchased unit). Not a real license.
+model DigitalFulfillment {
+  id          String    @id @default(uuid()) @db.Uuid
+  orderItemId String    @db.Uuid
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+  unitIndex   Int
+  code        String    @unique
+  issuedAt    DateTime  @default(now())
+
+  @@unique([orderItemId, unitIndex])
 }

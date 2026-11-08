@@ -54,7 +54,7 @@ export function AppLayout() {
           <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/wallet">Wallet</NavLink>
           <NavLink to="/shop">Shop</NavLink>
-          <NavLink to="/cart">Cart<CartCount /></NavLink>
+          <NavLink to="/cart">Cart<CartCount /></NavLink>          <NavLink to="/orders">Orders</NavLink>
           <NavLink to="/profile">Profile</NavLink>
         </nav>
         <div className="side-foot">

@@ -89,3 +89,14 @@ Top-ups use Stripe Checkout in **test mode only**; live keys are rejected at sta
 5. `docker compose up -d --build`, then Wallet → Top up. Pay with test card `4242 4242 4242 4242`, any future expiry, any CVC.
 
 The wallet is credited only after Stripe confirms payment (signed webhook, or a server-side session lookup when you return to the result page).
+
+### Wallet checkout and orders
+
+Customers pay for the cart from their **EUR demo wallet** (no Stripe session is involved; Stripe is only used to top the wallet up).
+
+- `GET /api/checkout/preview` shows the server-priced cart, wallet balance and blockers (informational only).
+- `POST /api/checkout` takes `{ idempotencyKey, shipping? }` and nothing price-related. In **one PostgreSQL transaction** it locks the cart, locks the product rows (by id), re-reads prices and stock, debits the wallet via the existing ledger (`order:<orderId>`), creates the order and item snapshots, decreases physical stock, issues demo digital entitlements and clears the cart. Retrying with the same key returns the original order; reusing a key with different shipping details is rejected (409).
+- `GET /api/orders` and `GET /api/orders/:id` are owner-only (other users get 404). There are no order-editing, refund or fulfillment-mutation endpoints.
+- Digital items get a clearly marked **demo** code (not a real license). Physical delivery (Processing → Shipped → Delivered) is **simulated** from the order's age, only advanced when the owner reads the order.
+
+Lock order everywhere: cart → products → wallet account. After pulling changes that add Prisma models, rebuild the API image (`docker compose up -d --build api`) so its generated client matches.

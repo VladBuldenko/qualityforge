@@ -162,7 +162,7 @@ export function Dashboard() {
       <div className="grid3">
         <section className="card"><h3>Wallet</h3><p className="muted">Your EUR and USD demo wallets.</p><Link to="/wallet">Open wallet →</Link></section>
         <section className="card"><h3>Shop</h3><p className="muted">Browse physical and digital products.</p><Link to="/shop">Open shop →</Link></section>
-        <section className="card placeholder"><h3>Orders</h3><p className="muted">Order history is coming in a later task.</p></section>
+        <section className="card"><h3>Orders</h3><p className="muted">Your paid orders, digital demo items and simulated delivery.</p><Link to="/orders">Open orders →</Link></section>
       </div>
     </>
   );

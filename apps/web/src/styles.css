@@ -100,3 +100,20 @@ h2 { font-size: 1.1rem; margin: 0 0 .75rem; } h3 { margin: 0 0 .25rem; }
 .shell > * { min-width:0; }
 @media (max-width: 720px) { .side-nav { flex-wrap:wrap; } .wallet-cards { grid-template-columns:1fr; } }
 .topup .chips { margin:.5rem 0 1rem; } .topup .field { max-width:360px; }
+.badge.ok { background:#dcfce7; color:#166534; }
+.checkout-grid { display:grid; grid-template-columns:minmax(0,3fr) minmax(0,2fr); gap:1rem; align-items:start; }
+.co-list, .order-list, .order-items { list-style:none; padding:0; margin:0; }
+.co-item { display:grid; grid-template-columns:48px minmax(0,1fr) auto; gap:.75rem; align-items:center; padding:.6rem 0; border-top:1px solid var(--line); }
+.co-item img { width:48px; height:48px; object-fit:cover; border-radius:8px; background:#e2e8f0; }
+.co-info { display:flex; flex-direction:column; gap:.15rem; min-width:0; overflow-wrap:anywhere; }
+.total-row { border-top:1px solid var(--line); padding-top:.75rem; margin-top:.25rem; }
+.ship { border:0; padding:0; margin:0 0 .5rem; min-width:0; } .ship legend { padding:0; }
+.order-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:1rem; align-items:center; margin-bottom:.75rem; }
+.order-total { white-space:nowrap; }
+.order-items .card { margin-bottom:.75rem; }
+.success-card { background:#f0fdf4; border-color:#bbf7d0; } .success-card h2 { margin:0 0 .25rem; color:var(--ok); }
+.demo-code { background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px; padding:.4rem .6rem; margin:.25rem 0; overflow-wrap:anywhere; }
+@media (max-width: 720px) {
+  .checkout-grid { grid-template-columns:1fr; }
+  .order-row { grid-template-columns:1fr; gap:.4rem; }
+}

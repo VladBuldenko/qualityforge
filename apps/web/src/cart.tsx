@@ -184,7 +184,9 @@ export function CartPage() {
       <div className="card summary">
         <div className="row between"><span>Subtotal</span><strong className="price-sm">{money(cart.subtotalCents)}</strong></div>
         <p className="muted small">Shipping and taxes are not calculated in this demo.</p>
-        <button className="btn full" disabled aria-disabled="true">Checkout — Coming soon</button>
+        {cart.hasIssues
+          ? <button className="btn full" disabled aria-disabled="true">Fix item issues to check out</button>
+          : <Link className="btn full" to="/checkout">Checkout</Link>}
         <Link to="/shop">← Continue shopping</Link>
       </div>
     </>

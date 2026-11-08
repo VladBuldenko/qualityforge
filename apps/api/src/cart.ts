@@ -27,7 +27,7 @@ type Tx = Prisma.TransactionClient;
 type CartWithItems = Prisma.CartGetPayload<{ include: { items: { include: { product: true } } } }>;
 
 // Builds the response from server-side data only. All money is integer cents.
-function toDto(cart: CartWithItems | null) {
+export function toDto(cart: CartWithItems | null) {
   const items = (cart?.items ?? [])
     .slice()
     .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id))
@@ -61,7 +61,7 @@ function toDto(cart: CartWithItems | null) {
   };
 }
 
-const loadCart = (db: Tx | typeof prisma, userId: string) =>
+export const loadCart = (db: Tx | typeof prisma, userId: string) =>
   db.cart.findUnique({ where: { userId }, include: { items: { include: { product: true } } } });
 
 // Runs fn with the user's cart row locked, so concurrent changes by the same user are serialized

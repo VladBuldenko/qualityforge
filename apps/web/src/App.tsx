@@ -3,6 +3,7 @@ import { AuthProvider, RequireAuth, useAuth } from "./auth";
 import { AppLayout, PublicLayout } from "./Layout";
 import { CartPage, CartProvider } from "./cart";
 import { TopUpResultPage, WalletPage } from "./wallet";
+import { CheckoutPage, OrderDetailPage, OrdersPage } from "./orders";
 import { Shop, ProductDetail } from "./shop";
 import { Dashboard, Home, Login, NotFound, Profile, Register } from "./pages";
 
@@ -33,6 +34,9 @@ export function App() {
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="/wallet/top-up/result" element={<TopUpResultPage />} />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/orders/:id" element={<OrderDetailPage />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
         </Routes>
