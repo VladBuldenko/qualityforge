@@ -6,6 +6,7 @@ import pg from "pg";
 import { authRouter, SESSION_COOKIE } from "./auth.js";
 import { cartRouter } from "./cart.js";
 import { productsRouter } from "./products.js";
+import { stripeWebhookRouter, topUpsRouter } from "./topups.js";
 import { walletRouter } from "./wallet.js";
 import { config } from "./config.js";
 import { prisma } from "./db.js";
@@ -14,6 +15,9 @@ export const app = express();
 
 if (config.isProd) app.set("trust proxy", 1); // behind a TLS-terminating proxy
 app.disable("x-powered-by");
+
+// Stripe webhook first: it needs the raw body (before express.json) and uses signature auth, not Origin/CSRF checks.
+app.use("/api/webhooks/stripe", stripeWebhookRouter);
 
 app.use(cors({ origin: config.webOrigin, credentials: true }));
 app.use(express.json({ limit: "10kb" }));
@@ -59,6 +63,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/wallet", walletRouter);
+app.use("/api/top-ups", topUpsRouter);
 
 // Express 5 forwards async errors here; keep unexpected failures as clean 500s.
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {

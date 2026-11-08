@@ -23,6 +23,7 @@ model User {
   cart               Cart?
   walletAccounts     WalletAccount[]
   walletTransactions WalletTransaction[]
+  topUps             TopUp[]
 }
 
 // Session store table used by connect-pg-simple (layout must match its expectations).
@@ -129,6 +130,7 @@ model WalletTransaction {
   description String?
   createdAt   DateTime        @default(now())
   entries     LedgerEntry[]
+  topUp       TopUp?
 
   @@index([userId, createdAt])
 }
@@ -146,4 +148,35 @@ model LedgerEntry {
 
   @@index([transactionId])
   @@index([accountId, createdAt])
+}
+
+enum PaymentProvider {
+  STRIPE
+}
+
+enum TopUpStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELED
+}
+
+// A wallet top-up paid through Stripe Checkout (TEST MODE only). Created PENDING before the customer is sent to Stripe;
+// becomes SUCCEEDED only in the same DB transaction that records the wallet credit.
+model TopUp {
+  id                      String             @id @default(uuid()) @db.Uuid
+  userId                  String             @db.Uuid
+  user                    User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  provider                PaymentProvider    @default(STRIPE)
+  amountMinor             Int
+  currency                Currency           @default(EUR)
+  status                  TopUpStatus        @default(PENDING)
+  stripeCheckoutSessionId String?            @unique
+  stripePaymentIntentId   String?            @unique
+  walletTransactionId     String?            @unique @db.Uuid
+  walletTransaction       WalletTransaction? @relation(fields: [walletTransactionId], references: [id], onDelete: Restrict)
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+
+  @@index([userId, createdAt])
 }

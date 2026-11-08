@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider, RequireAuth, useAuth } from "./auth";
 import { AppLayout, PublicLayout } from "./Layout";
 import { CartPage, CartProvider } from "./cart";
-import { WalletPage } from "./wallet";
+import { TopUpResultPage, WalletPage } from "./wallet";
 import { Shop, ProductDetail } from "./shop";
 import { Dashboard, Home, Login, NotFound, Profile, Register } from "./pages";
 
@@ -31,6 +31,7 @@ export function App() {
           <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/wallet/top-up/result" element={<TopUpResultPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/profile" element={<Profile />} />
           </Route>

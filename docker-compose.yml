@@ -22,6 +22,9 @@ services:
       WEB_ORIGIN: http://localhost:5173
       # Dev-only fallback; set SESSION_SECRET in a root .env (or shell) to override.
       SESSION_SECRET: ${SESSION_SECRET:-walletshop-dev-only-session-secret}
+      # Stripe TEST mode only (sk_test_..., whsec_...). Put real values in the untracked root .env, never in this file.
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
     command: sh -c "npx prisma migrate deploy && npm run seed && npm run dev"
     ports:
       - "4000:4000"

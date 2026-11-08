@@ -87,8 +87,9 @@ function assertAmount(amountMinor: number) {
     throw new WalletError("INVALID_AMOUNT", "Amount must be a positive whole number of minor units");
 }
 
-export const credit = (input: OperationInput) => applyOperation("CREDIT", input);
-export const debit = (input: OperationInput) => applyOperation("DEBIT", input);
+/** Pass `tx` to run the operation inside the caller's DB transaction (e.g. top-up completion); otherwise it opens its own. */
+export const credit = (input: OperationInput, tx?: Tx) => applyOperation("CREDIT", input, tx);
+export const debit = (input: OperationInput, tx?: Tx) => applyOperation("DEBIT", input, tx);
 
 /**
  * Atomically moves funds between the user's account and the currency's clearing account.
@@ -97,53 +98,56 @@ export const debit = (input: OperationInput) => applyOperation("DEBIT", input);
  * - operationId is unique: repeating a finished operation returns the original result without moving money again.
  * - Transaction + two ledger entries + balance update commit or roll back together.
  */
-async function applyOperation(type: "CREDIT" | "DEBIT", input: OperationInput) {
-  const { userId, currency, amountMinor, operationId, description } = input;
+async function applyOperation(type: "CREDIT" | "DEBIT", input: OperationInput, outerTx?: Tx) {
+  const { userId, currency, amountMinor, operationId } = input;
   assertAmount(amountMinor);
   if (!CURRENCIES.includes(currency)) throw new WalletError("INVALID_CURRENCY", "Unsupported currency");
   if (!operationId || operationId.length > 200) throw new WalletError("OPERATION_ID_REUSED", "A valid operationId is required");
 
   try {
-    return await prisma.$transaction(async (tx) => {
-      const locked = await tx.$queryRaw<{ id: string; balanceMinor: number }[]>`
-        SELECT id, "balanceMinor" FROM "WalletAccount"
-        WHERE "userId" = ${userId}::uuid AND "currency" = ${currency}::"Currency" AND "kind" = 'USER'
-        FOR UPDATE`;
-      const account = locked[0];
-      if (!account) throw new WalletError("NO_WALLET", "Wallet not found");
-
-      const existing = await tx.walletTransaction.findUnique({ where: { operationId } });
-      if (existing) {
-        if (existing.userId !== userId || existing.type !== type || existing.currency !== currency || existing.amountMinor !== amountMinor)
-          throw new WalletError("OPERATION_ID_REUSED", "operationId was already used for a different operation");
-        return { duplicate: true, reference: existing.id, balanceMinor: account.balanceMinor };
-      }
-
-      const delta = type === "CREDIT" ? amountMinor : -amountMinor;
-      const newBalance = account.balanceMinor + delta;
-      if (newBalance < 0) throw new WalletError("INSUFFICIENT_FUNDS", "Insufficient balance");
-      if (newBalance > MAX_AMOUNT_MINOR) throw new WalletError("BALANCE_LIMIT", "Balance limit exceeded");
-
-      const clearing = await tx.walletAccount.findFirstOrThrow({ where: { kind: "CLEARING", currency } });
-      await tx.walletAccount.update({ where: { id: account.id }, data: { balanceMinor: newBalance } });
-      const t = await tx.walletTransaction.create({
-        data: {
-          operationId, userId, type, currency, amountMinor, description,
-          entries: {
-            create: [
-              { accountId: account.id, amountMinor: delta, balanceAfterMinor: newBalance },
-              { accountId: clearing.id, amountMinor: -delta },
-            ],
-          },
-        },
-      });
-      return { duplicate: false, reference: t.id, balanceMinor: newBalance };
-    });
+    return outerTx ? await run(outerTx) : await prisma.$transaction(run);
   } catch (e) {
     // Same operationId used by two different users at once: the unique index rejects the second.
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")
       throw new WalletError("OPERATION_ID_REUSED", "operationId was already used");
     throw e;
+  }
+
+  async function run(tx: Tx) {
+    const { description } = input;
+    const locked = await tx.$queryRaw<{ id: string; balanceMinor: number }[]>`
+      SELECT id, "balanceMinor" FROM "WalletAccount"
+      WHERE "userId" = ${userId}::uuid AND "currency" = ${currency}::"Currency" AND "kind" = 'USER'
+      FOR UPDATE`;
+    const account = locked[0];
+    if (!account) throw new WalletError("NO_WALLET", "Wallet not found");
+
+    const existing = await tx.walletTransaction.findUnique({ where: { operationId } });
+    if (existing) {
+      if (existing.userId !== userId || existing.type !== type || existing.currency !== currency || existing.amountMinor !== amountMinor)
+        throw new WalletError("OPERATION_ID_REUSED", "operationId was already used for a different operation");
+      return { duplicate: true, reference: existing.id, balanceMinor: account.balanceMinor };
+    }
+
+    const delta = type === "CREDIT" ? amountMinor : -amountMinor;
+    const newBalance = account.balanceMinor + delta;
+    if (newBalance < 0) throw new WalletError("INSUFFICIENT_FUNDS", "Insufficient balance");
+    if (newBalance > MAX_AMOUNT_MINOR) throw new WalletError("BALANCE_LIMIT", "Balance limit exceeded");
+
+    const clearing = await tx.walletAccount.findFirstOrThrow({ where: { kind: "CLEARING", currency } });
+    await tx.walletAccount.update({ where: { id: account.id }, data: { balanceMinor: newBalance } });
+    const t = await tx.walletTransaction.create({
+      data: {
+        operationId, userId, type, currency, amountMinor, description,
+        entries: {
+          create: [
+            { accountId: account.id, amountMinor: delta, balanceAfterMinor: newBalance },
+            { accountId: clearing.id, amountMinor: -delta },
+          ],
+        },
+      },
+    });
+    return { duplicate: false, reference: t.id, balanceMinor: newBalance };
   }
 }
 

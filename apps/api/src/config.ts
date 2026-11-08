@@ -8,6 +8,9 @@ export const config = {
   webOrigin: process.env.WEB_ORIGIN ?? "http://localhost:5173",
   databaseUrl: process.env.DATABASE_URL ?? "",
   sessionSecret: process.env.SESSION_SECRET ?? "",
+  // Stripe is optional: without keys the app runs and top-ups report "not configured". TEST-mode keys only.
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? "",
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
 };
 
 if (!config.databaseUrl) {
@@ -18,4 +21,11 @@ if (config.sessionSecret.length < 16) {
 }
 if (isProd && config.sessionSecret.startsWith("walletshop-dev")) {
   throw new Error("Refusing to use the development SESSION_SECRET in production");
+}
+
+if (config.stripeSecretKey && !/^(sk|rk)_test_/.test(config.stripeSecretKey)) {
+  throw new Error("STRIPE_SECRET_KEY must be a Stripe TEST mode key (sk_test_...). Live keys are not allowed.");
+}
+if (config.stripeWebhookSecret && !config.stripeWebhookSecret.startsWith("whsec_")) {
+  throw new Error("STRIPE_WEBHOOK_SECRET must be a Stripe webhook signing secret (whsec_...).");
 }

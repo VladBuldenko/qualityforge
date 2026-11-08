@@ -70,3 +70,22 @@ cd apps/web && npm install && npm run dev
 1. Foundation (done) 2. Auth 3. Catalog and cart 4. Wallet 5. Stripe test top-ups
 6. Checkout and orders 7. EUR/USD exchange 8. Integration and UI polish.
 Money is stored as integer minor units, mutated in DB transactions, with idempotency keys on payments/checkout.
+
+### Wallet top-ups with Stripe (test mode)
+
+Top-ups use Stripe Checkout in **test mode only**; live keys are rejected at startup. Without keys the app still runs and top-ups report "not configured".
+
+1. Create/sign in to a Stripe account and stay in **test mode**. Copy the secret key (`sk_test_...`) from Developers → API keys.
+2. Install the [Stripe CLI](https://docs.stripe.com/stripe-cli) and run `stripe login` (opens your browser).
+3. Forward webhooks to the API and note the signing secret it prints (`whsec_...`):
+   ```bash
+   stripe listen --forward-to http://localhost:4000/api/webhooks/stripe
+   ```
+4. Put both values in an untracked `.env` at the repo root (Docker Compose reads it; for non-Docker runs use `apps/api/.env`):
+   ```
+   STRIPE_SECRET_KEY=sk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   ```
+5. `docker compose up -d --build`, then Wallet → Top up. Pay with test card `4242 4242 4242 4242`, any future expiry, any CVC.
+
+The wallet is credited only after Stripe confirms payment (signed webhook, or a server-side session lookup when you return to the result page).

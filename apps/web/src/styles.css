@@ -99,3 +99,4 @@ h2 { font-size: 1.1rem; margin: 0 0 .75rem; } h3 { margin: 0 0 .25rem; }
 @media (max-width: 720px) { .tx { flex-direction:column; gap:.25rem; } .tx-amount { text-align:left; } .wallet-actions .btn { width:100%; } }
 .shell > * { min-width:0; }
 @media (max-width: 720px) { .side-nav { flex-wrap:wrap; } .wallet-cards { grid-template-columns:1fr; } }
+.topup .chips { margin:.5rem 0 1rem; } .topup .field { max-width:360px; }

@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "seed": "tsx prisma/seed.ts",
-    "test": "tsx --test --test-concurrency=1 src/auth.test.ts src/products.test.ts src/cart.test.ts src/wallet.test.ts",
+    "test": "tsx --test --test-concurrency=1 src/auth.test.ts src/products.test.ts src/cart.test.ts src/wallet.test.ts src/topups.test.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"
   },
@@ -22,6 +22,7 @@
     "express-rate-limit": "^8.7.3",
     "express-session": "^1.19.0",
     "pg": "^8.23.1",
+    "stripe": "^23.1.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
