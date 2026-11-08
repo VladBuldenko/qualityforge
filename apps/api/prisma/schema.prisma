@@ -13,14 +13,16 @@ enum Role {
 }
 
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  name         String
-  email        String   @unique
-  passwordHash String
-  role         Role     @default(CUSTOMER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  cart         Cart?
+  id                 String              @id @default(uuid()) @db.Uuid
+  name               String
+  email              String              @unique
+  passwordHash       String
+  role               Role                @default(CUSTOMER)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  cart               Cart?
+  walletAccounts     WalletAccount[]
+  walletTransactions WalletTransaction[]
 }
 
 // Session store table used by connect-pg-simple (layout must match its expectations).
@@ -54,7 +56,7 @@ model Product {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  cartItems     CartItem[]
+  cartItems CartItem[]
 
   @@index([isActive, type])
   @@index([category])
@@ -82,4 +84,66 @@ model CartItem {
   updatedAt DateTime @updatedAt
 
   @@unique([cartId, productId])
+}
+
+enum Currency {
+  EUR
+  USD
+}
+
+enum AccountKind {
+  USER // a customer's wallet in one currency
+  CLEARING // internal counter-account: the other side of every credit/debit (balance is derived from entries)
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+// Amounts are integer minor units (cents). CHECK constraints (balance >= 0 for USER accounts, etc.),
+// the clearing-account uniqueness and the append-only triggers live in the migration SQL.
+model WalletAccount {
+  id           String        @id @default(uuid()) @db.Uuid
+  userId       String?       @db.Uuid
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  currency     Currency
+  kind         AccountKind   @default(USER)
+  balanceMinor Int           @default(0) // maintained for USER accounts only
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  entries      LedgerEntry[]
+
+  @@unique([userId, currency])
+}
+
+// One row per financial operation. Append-only. operationId is the idempotency key.
+model WalletTransaction {
+  id          String          @id @default(uuid()) @db.Uuid
+  operationId String          @unique
+  userId      String          @db.Uuid
+  user        User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  type        TransactionType
+  currency    Currency
+  amountMinor Int
+  description String?
+  createdAt   DateTime        @default(now())
+  entries     LedgerEntry[]
+
+  @@index([userId, createdAt])
+}
+
+// Double entry: every transaction has two entries (user account and clearing account) summing to zero. Append-only.
+model LedgerEntry {
+  id                String            @id @default(uuid()) @db.Uuid
+  transactionId     String            @db.Uuid
+  transaction       WalletTransaction @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+  accountId         String            @db.Uuid
+  account           WalletAccount     @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  amountMinor       Int // signed: + increases the account, - decreases it
+  balanceAfterMinor Int? // USER accounts only
+  createdAt         DateTime          @default(now())
+
+  @@index([transactionId])
+  @@index([accountId, createdAt])
 }

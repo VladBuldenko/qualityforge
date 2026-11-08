@@ -52,6 +52,7 @@ export function AppLayout() {
         <Brand />
         <nav className="side-nav" aria-label="Main">
           <NavLink to="/dashboard">Dashboard</NavLink>
+          <NavLink to="/wallet">Wallet</NavLink>
           <NavLink to="/shop">Shop</NavLink>
           <NavLink to="/cart">Cart<CartCount /></NavLink>
           <NavLink to="/profile">Profile</NavLink>

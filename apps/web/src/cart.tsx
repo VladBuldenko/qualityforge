@@ -24,7 +24,7 @@ const CartContext = createContext<CartState>(null!);
 export const useCart = () => useContext(CartContext);
 
 export const money = (cents: number, currency = "EUR") =>
-  new Intl.NumberFormat("en-IE", { style: "currency", currency }).format(cents / 100);
+  new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();

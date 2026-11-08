@@ -63,7 +63,10 @@ authRouter.post("/register", async (req, res) => {
   const passwordHash = await bcrypt.hash(password, 12);
   try {
     // role is never taken from the request: new users are always CUSTOMER.
-    const user = await prisma.user.create({ data: { name, email, passwordHash } });
+    // Every new customer gets their EUR and USD wallets (zero balance) in the same transaction.
+    const user = await prisma.user.create({
+      data: { name, email, passwordHash, walletAccounts: { create: [{ currency: "EUR" }, { currency: "USD" }] } },
+    });
     res.status(201).json({ user: publicUser(user) });
   } catch (e: any) {
     if (e?.code === "P2002") {

@@ -17,7 +17,7 @@ export function Home() {
         <Link className="btn ghost big" to="/login">Log in</Link>
       </div>
       <div className="grid3">
-        <div className="card"><h3>Wallets</h3><p className="muted">EUR and USD balances. Coming soon.</p></div>
+        <div className="card"><h3>Wallets</h3><p className="muted">EUR and USD demo balances. Top-ups coming soon.</p></div>
         <div className="card"><h3>Exchange</h3><p className="muted">Convert between currencies at demo rates. Coming soon.</p></div>
         <div className="card"><h3>Shop</h3><p className="muted">Browse physical and digital products.</p><Link to="/shop">Open shop →</Link></div>
       </div>
@@ -160,7 +160,7 @@ export function Dashboard() {
         <Link to="/profile">View profile →</Link>
       </section>
       <div className="grid3">
-        <section className="card placeholder"><h3>Wallet</h3><p className="muted">EUR/USD wallets are coming in a later task.</p></section>
+        <section className="card"><h3>Wallet</h3><p className="muted">Your EUR and USD demo wallets.</p><Link to="/wallet">Open wallet →</Link></section>
         <section className="card"><h3>Shop</h3><p className="muted">Browse physical and digital products.</p><Link to="/shop">Open shop →</Link></section>
         <section className="card placeholder"><h3>Orders</h3><p className="muted">Order history is coming in a later task.</p></section>
       </div>

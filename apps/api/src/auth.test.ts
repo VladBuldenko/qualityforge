@@ -3,6 +3,7 @@ import { after, before, test } from "node:test";
 import type { Server } from "node:http";
 import { app } from "./app.js";
 import { prisma } from "./db.js";
+import { deleteTestUsers } from "./test-utils.js";
 
 const ORIGIN = process.env.WEB_ORIGIN ?? "http://localhost:5173";
 const email = `smoke-${Date.now()}@example.test`;
@@ -28,7 +29,7 @@ before(async () => {
 });
 
 after(async () => {
-  await prisma.user.deleteMany({ where: { email } });
+  await deleteTestUsers([email]);
   server.close();
   await prisma.$disconnect();
   process.exit(0); // the session pool keeps the event loop alive
