@@ -4,6 +4,7 @@ import express, { type NextFunction, type Request, type Response } from "express
 import session from "express-session";
 import pg from "pg";
 import { authRouter, SESSION_COOKIE } from "./auth.js";
+import { cartRouter } from "./cart.js";
 import { productsRouter } from "./products.js";
 import { config } from "./config.js";
 import { prisma } from "./db.js";
@@ -55,6 +56,7 @@ app.get("/health", async (_req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/products", productsRouter);
+app.use("/api/cart", cartRouter);
 
 // Express 5 forwards async errors here; keep unexpected failures as clean 500s.
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {

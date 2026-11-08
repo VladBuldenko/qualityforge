@@ -106,7 +106,7 @@ export function Login() {
   const [formError, setFormError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) return <Navigate to={state?.from ?? "/dashboard"} replace />;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();

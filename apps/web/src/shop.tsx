@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api, ApiError } from "./api";
+import { AddToCartButton, money } from "./cart";
 
 export type Product = {
   id: string; name: string; slug: string; description: string; type: "PHYSICAL" | "DIGITAL";
   category: string; priceCents: number; currency: string; image: string; stockQuantity: number | null; inStock: boolean;
 };
 type ListResponse = { items: Product[]; page: number; pageSize: number; total: number; totalPages: number; categories: string[] };
-
-const money = (cents: number, currency: string) =>
-  new Intl.NumberFormat("en-IE", { style: "currency", currency }).format(cents / 100);
 
 function Availability({ p }: { p: Product }) {
   if (p.stockQuantity === null) return <span className="avail ok">Instant delivery</span>;
@@ -67,7 +65,7 @@ export function Shop() {
   return (
     <main className="page">
       <h1>Shop</h1>
-      <p className="muted">Physical and digital products. Purchasing arrives in a later task.</p>
+      <p className="muted">Physical and digital products. Add items to your cart. Checkout arrives in a later task.</p>
 
       <div className="filters">
         <div className="field grow">
@@ -98,17 +96,20 @@ export function Shop() {
       {data && (
         <div className={`product-grid ${loading ? "dim" : ""}`}>
           {data.items.map((p) => (
-            <Link key={p.id} to={`/shop/${p.slug}`} className="product-card">
-              <img src={p.image} alt={p.name} loading="lazy" />
-              <div className="product-body">
-                <div className="row between"><TypeBadge type={p.type} /><span className="muted small">{p.category}</span></div>
-                <h3>{p.name}</h3>
-                <div className="row between">
-                  <strong>{money(p.priceCents, p.currency)}</strong>
-                  <Availability p={p} />
+            <article key={p.id} className="product-card">
+              <Link to={`/shop/${p.slug}`} className="product-link">
+                <img src={p.image} alt={p.name} loading="lazy" />
+                <div className="product-body">
+                  <div className="row between"><TypeBadge type={p.type} /><span className="muted small">{p.category}</span></div>
+                  <h3>{p.name}</h3>
+                  <div className="row between">
+                    <strong>{money(p.priceCents, p.currency)}</strong>
+                    <Availability p={p} />
+                  </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
+              <div className="product-actions"><AddToCartButton product={p} compact /></div>
+            </article>
           ))}
         </div>
       )}
@@ -168,7 +169,7 @@ export function ProductDetail() {
                 : "Shipped to your address. Shipping is simulated in this demo."}
             </dd>
           </dl>
-          <button className="btn" disabled aria-disabled="true">Add to cart — Coming soon</button>
+          <AddToCartButton product={product} />
         </div>
       </div>
     </main>

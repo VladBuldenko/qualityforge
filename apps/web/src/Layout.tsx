@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "./auth";
+import { useCart } from "./cart";
 
 export function Brand() {
   return (
@@ -7,6 +8,11 @@ export function Brand() {
       <span className="logo">W</span> WalletShop
     </Link>
   );
+}
+
+function CartCount() {
+  const { cart } = useCart();
+  return cart && cart.itemCount > 0 ? <span className="count" aria-label={`${cart.itemCount} items in cart`}>{cart.itemCount}</span> : null;
 }
 
 export function PublicLayout() {
@@ -17,6 +23,7 @@ export function PublicLayout() {
         <Brand />
         <nav className="row">
           <Link className="btn ghost" to="/shop">Shop</Link>
+          <Link className="btn ghost" to="/cart">Cart<CartCount /></Link>
           {user ? (
             <Link className="btn" to="/dashboard">Dashboard</Link>
           ) : (
@@ -46,6 +53,7 @@ export function AppLayout() {
         <nav className="side-nav" aria-label="Main">
           <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/shop">Shop</NavLink>
+          <NavLink to="/cart">Cart<CartCount /></NavLink>
           <NavLink to="/profile">Profile</NavLink>
         </nav>
         <div className="side-foot">

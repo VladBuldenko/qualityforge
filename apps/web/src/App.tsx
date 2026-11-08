@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider, RequireAuth, useAuth } from "./auth";
 import { AppLayout, PublicLayout } from "./Layout";
+import { CartPage, CartProvider } from "./cart";
 import { Shop, ProductDetail } from "./shop";
 import { Dashboard, Home, Login, NotFound, Profile, Register } from "./pages";
 
@@ -14,6 +15,7 @@ export function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <CartProvider>
         <Routes>
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
@@ -27,9 +29,11 @@ export function App() {
           </Route>
           <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/cart" element={<CartPage />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
         </Routes>
+        </CartProvider>
       </AuthProvider>
     </BrowserRouter>
   );

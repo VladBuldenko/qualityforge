@@ -72,3 +72,21 @@ h2 { font-size: 1.1rem; margin: 0 0 .75rem; } h3 { margin: 0 0 .25rem; }
 @media (max-width: 720px) { .detail { grid-template-columns:1fr; } .page { padding:1rem; } }
 .topbar { flex-wrap:wrap; gap:.5rem; }
 @media (max-width: 720px) { .topbar { padding:.75rem 1rem; } .topbar .btn { padding:.35rem .7rem; font-size:.9rem; } .topbar nav { gap:.35rem; } }
+.product-card { display:flex; flex-direction:column; } .product-link { color:inherit; text-decoration:none; display:block; flex:1; }
+.product-actions { padding:0 1rem 1rem; }
+.add-wrap { display:flex; flex-direction:column; gap:.35rem; } .add-wrap .btn { width:100%; }
+.add-msg { margin:0; font-size:.85rem; min-height:1.2em; color:var(--ok); } .add-msg.bad { color:var(--err); }
+.count { display:inline-grid; place-items:center; min-width:1.35rem; height:1.35rem; padding:0 .3rem; margin-left:.4rem; border-radius:999px; background:var(--brand); color:#fff; font-size:.75rem; font-weight:700; }
+.side-nav a .count { vertical-align:middle; }
+.cart-list { list-style:none; padding:0; margin:1rem 0; display:grid; gap:.75rem; }
+.cart-item { display:grid; grid-template-columns:72px 1fr auto auto auto; gap:1rem; align-items:center; margin:0; }
+.cart-item img { width:72px; height:72px; border-radius:10px; object-fit:cover; }
+.cart-info { min-width:0; display:flex; flex-direction:column; gap:.25rem; } .cart-info .field-error { margin:0; }
+.qty { display:flex; align-items:center; gap:.5rem; } .qty span { min-width:1.5rem; text-align:center; font-weight:600; } .qty .btn { padding:.25rem .7rem; }
+.line-total { font-weight:700; min-width:5rem; text-align:right; }
+.btn.danger { color:var(--err); border-color:#fecaca; } .btn.danger:hover { background:#fef2f2; }
+.summary { display:flex; flex-direction:column; gap:.5rem; } .summary .btn.full { margin:.5rem 0; } .price-sm { font-size:1.4rem; }
+@media (max-width: 720px) {
+  .cart-item { grid-template-columns:64px 1fr; } .cart-item img { width:64px; height:64px; }
+  .cart-item .qty, .cart-item .line-total, .cart-item .btn.danger { grid-column:2; } .line-total { text-align:left; }
+}
